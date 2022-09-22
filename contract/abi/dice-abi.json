@@ -1,0 +1,35 @@
+{
+    "methods": {
+        "hello": {
+            "input": "dice.hello_arguments",
+            "output": "dice.hello_result",
+            "description": "Says Hello!",
+            "entryPoint": 754077114,
+            "readOnly": true
+        }
+    },
+    "types": {
+        "nested": {
+            "dice": {
+                "nested": {
+                    "hello_arguments": {
+                        "fields": {
+                            "name": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "hello_result": {
+                        "fields": {
+                            "value": {
+                                "type": "string",
+                                "id": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

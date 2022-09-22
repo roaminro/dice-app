@@ -1,0 +1,12 @@
+{
+    "methods": {
+        "hello": {
+            "argument": "dice.hello_arguments",
+            "return": "dice.hello_result",
+            "description": "Says Hello!",
+            "entry-point": "0x2cf24dba",
+            "read-only": true
+        }
+    },
+    "types": "CnYKGWFzc2VtYmx5L3Byb3RvL2RpY2UucHJvdG8SBGRpY2UiJQoPaGVsbG9fYXJndW1lbnRzEhIKBG5hbWUYASABKAlSBG5hbWUiJAoMaGVsbG9fcmVzdWx0EhQKBXZhbHVlGAEgASgJUgV2YWx1ZWIGcHJvdG8z"
+}
