@@ -2,12 +2,60 @@ syntax = "proto3";
 
 package dice;
 
-// @description Says Hello!
-// @read-only true
-message hello_arguments {
-  string name = 1;
+import "koinos/options.proto";
+
+// @description Place a bet
+// @read-only false
+message bet_arguments {
+  bytes account = 1 [(koinos.btype) = ADDRESS];
+  uint64 amount = 2 [jstype = JS_STRING];
+  uint32 value = 3;
 }
 
-message hello_result {
-  string value = 1;
+message bet_result {
+}
+
+// @description Roll the dice
+// @read-only false
+message roll_arguments {
+  bytes txId = 1 [(koinos.btype) = TRANSACTION_ID];
+  bytes vrf_proof = 2 [(koinos.btype) = BASE64];
+  bytes vrf_hash = 3 [(koinos.btype) = BASE64];
+}
+
+message roll_result {
+}
+
+// @description Get a bet
+// @read-only true
+message get_bet_arguments {
+  bytes txId = 1 [(koinos.btype) = TRANSACTION_ID];
+}
+
+message get_bet_result {
+  bet_object bet = 1;
+}
+
+// events
+message bet_placed_event {
+  uint64 amount = 1 [jstype = JS_STRING];
+  uint32 value = 2;
+}
+
+message dice_rolled_event {
+  bet_status status = 1;
+}
+
+// objects
+enum bet_status {
+  not_rolled = 0;
+  won = 1;
+  lost = 2;
+}
+
+message bet_object {
+  bytes account = 1 [(koinos.btype) = ADDRESS];
+  bet_status status = 2;
+  uint64 amount = 3 [jstype = JS_STRING];
+  uint32 value = 4;
 }
