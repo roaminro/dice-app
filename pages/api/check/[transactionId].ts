@@ -1,22 +1,40 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { prove, proofToHash } from '@roamin/ecvrf'
-import { Provider, Signer } from 'koilib'
+import { Contract, Provider, Signer, utils } from 'koilib'
 import { ApiError } from 'next/dist/server/api-utils'
 import { TransactionJson } from 'koilib/lib/interface'
 
-// Koinos Private Key 
-const { KOINOS_PK, KOINOS_RPC_URL } = process.env
+import diceAbi from '../../../contract/abi/dice_abi_js.json'
+
+//env variables
+const { KOINOS_WIF, KOINOS_RPC_URL } = process.env
+
+// @ts-ignore koilib_types is needed when using koilib
+diceAbi.koilib_types = diceAbi.types
 
 const provider = new Provider([KOINOS_RPC_URL as string])
-const signer = new Signer({ privateKey: KOINOS_PK as string, provider })
+const signer = Signer.fromWif(KOINOS_WIF as string)
+signer.provider = provider
+
+const diceContract = new Contract({
+  id: '1LZgKPHVLqrVv418UbFCymU5NNwSG2sUpm',
+  // @ts-ignore the abi provided is compatible
+  abi: diceAbi,
+  provider,
+  signer,
+})
+
+const diceFunctions = diceContract.functions
 
 type Query = {
   transactionId: string
 }
 
 type Result = {
-  proof: string
-  proofHash: string
+  vrfProof: string
+  vrfHash: string,
+  roll: string,
+  rollTxId: string;
 }
 
 type ResponseError = {
@@ -34,9 +52,19 @@ export default async function handler(
       throw new ApiError(400, 'transactionId is missing')
     }
 
+    // check if dice has not been rolled already for that transaction
+    const { result } = await diceFunctions.get_bet({
+      tx_id: transactionId
+    })
+
+    // @ts-ignore bet.status is a valid object
+    if (result?.bet?.status != undefined && result?.bet?.status != 0) {
+      // throw new ApiError(400, `dice has already been rolled for transaction with id "${transactionId}"`)
+    }
+
     let transactions: {
-      transaction: TransactionJson;
-      containing_blocks: string[];
+      transaction: TransactionJson
+      containing_blocks: string[]
     }[] = []
 
     // get transaction
@@ -53,29 +81,48 @@ export default async function handler(
     }
 
     // get the last block that contains the transaction (should be least old block)
-    const { containing_blocks: containingBlocks } = transactions[0]
+    // const { containing_blocks: containingBlocks } = transactions[0]
 
-    const blockId = containingBlocks[containingBlocks.length - 1]
-    const { block_items: blockItems } = await provider.getBlocksById([blockId])
+    // const blockId = containingBlocks[containingBlocks.length - 1]
+    // const { block_items: blockItems } = await provider.getBlocksById([blockId])
 
-    if (!blockItems.length) {
-      throw new ApiError(404, `block with id "${blockId}" does not exist`)
-    }
+    // if (!blockItems.length) {
+    //   throw new ApiError(404, `block with id "${blockId}" does not exist`)
+    // }
 
-    const { block_height: blockHeight } = blockItems[0]
+    // const { block_height: blockHeight } = blockItems[0]
 
     // get last irreversible block info
-    const headInfo = await provider.getHeadInfo()
+    // const headInfo = await provider.getHeadInfo()
 
-    if (parseInt(headInfo.last_irreversible_block) < parseInt(blockHeight)) {
-      throw new ApiError(400, `block "${blockId}" is not yet irreversible`)
-    }
+    // if (parseInt(headInfo.last_irreversible_block) < parseInt(blockHeight)) {
+    //   throw new ApiError(400, `block "${blockId}" is not yet irreversible`)
+    // }
 
     // use the transaction id to calculate the proof
-    const proof = prove(KOINOS_PK as string, transactionId.slice(2))
-    const proofHash = proofToHash(proof)
+    let vrfProof = prove(signer.getPrivateKey(), transactionId.slice(2))
+    let vrfHash = proofToHash(vrfProof)
 
-    res.status(200).json({ proof, proofHash })
+    // calculate roll locally
+    // vrfHash is a uint256, ans the contract uses a uint128, so we need to cast it
+    const random = BigInt('0x' + vrfHash.substring(0, 32))
+    const roll = random % 6n + 1n
+
+    console.log('roll', roll)
+
+    // prepend 0x
+    vrfProof = '0x' + vrfProof
+    vrfHash = '0x' + utils.toHexString(utils.multihash(Buffer.from(vrfHash, 'hex')))
+
+    const txInfo = await diceFunctions.roll({
+      tx_id: transactionId,
+      vrf_proof: vrfProof,
+      vrf_hash: vrfHash,
+    }, {
+      sendTransaction: false
+    })
+
+    res.status(200).json({ vrfProof, vrfHash, roll: roll.toString(), rollTxId: txInfo.transaction?.id! })
   } catch (error) {
     if (error instanceof ApiError) {
       const { statusCode, message } = error

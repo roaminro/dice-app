@@ -39,6 +39,16 @@ export function main(): i32 {
       break;
     }
 
+    case 0x0154a749: {
+      const args = Protobuf.decode<ProtoNamespace.get_history_arguments>(
+        contractArgs.args,
+        ProtoNamespace.get_history_arguments.decode
+      );
+      const res = c.get_history(args);
+      retbuf = Protobuf.encode(res, ProtoNamespace.get_history_result.encode);
+      break;
+    }
+
     default:
       System.exit(1);
       break;

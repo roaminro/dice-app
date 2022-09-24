@@ -1,25 +1,32 @@
 {
     "methods": {
         "bet": {
-            "input": "dice.bet_arguments",
-            "output": "dice.bet_result",
+            "argument": "dice.bet_arguments",
+            "return": "dice.bet_result",
             "description": "Place a bet",
-            "entryPoint": 182740940,
-            "readOnly": false
+            "entry_point": 182740940,
+            "read_only": false
         },
         "roll": {
-            "input": "dice.roll_arguments",
-            "output": "dice.roll_result",
+            "argument": "dice.roll_arguments",
+            "return": "dice.roll_result",
             "description": "Roll the dice",
-            "entryPoint": 2902335468,
-            "readOnly": false
+            "entry_point": 2902335468,
+            "read_only": false
         },
         "get_bet": {
-            "input": "dice.get_bet_arguments",
-            "output": "dice.get_bet_result",
+            "argument": "dice.get_bet_arguments",
+            "return": "dice.get_bet_result",
             "description": "Get a bet",
-            "entryPoint": 637551505,
-            "readOnly": true
+            "entry_point": 637551505,
+            "read_only": true
+        },
+        "get_history": {
+            "argument": "dice.get_history_arguments",
+            "return": "dice.get_history_result",
+            "description": "Get history",
+            "entry_point": 22325065,
+            "read_only": true
         }
     },
     "types": {
@@ -53,25 +60,25 @@
                     },
                     "roll_arguments": {
                         "fields": {
-                            "txId": {
+                            "tx_id": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {
                                     "(koinos.btype)": "TRANSACTION_ID"
                                 }
                             },
-                            "vrfProof": {
+                            "vrf_proof": {
                                 "type": "bytes",
                                 "id": 2,
                                 "options": {
-                                    "(koinos.btype)": "BASE64"
+                                    "(koinos.btype)": "HEX"
                                 }
                             },
-                            "vrfHash": {
+                            "vrf_hash": {
                                 "type": "bytes",
                                 "id": 3,
                                 "options": {
-                                    "(koinos.btype)": "BASE64"
+                                    "(koinos.btype)": "HEX"
                                 }
                             }
                         }
@@ -81,7 +88,7 @@
                     },
                     "get_bet_arguments": {
                         "fields": {
-                            "txId": {
+                            "tx_id": {
                                 "type": "bytes",
                                 "id": 1,
                                 "options": {
@@ -94,6 +101,25 @@
                         "fields": {
                             "bet": {
                                 "type": "bet_object",
+                                "id": 1
+                            }
+                        }
+                    },
+                    "get_history_arguments": {
+                        "fields": {
+                            "account": {
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "ADDRESS"
+                                }
+                            }
+                        }
+                    },
+                    "get_history_result": {
+                        "fields": {
+                            "history": {
+                                "type": "history_object",
                                 "id": 1
                             }
                         }
@@ -118,6 +144,10 @@
                             "status": {
                                 "type": "bet_status",
                                 "id": 1
+                            },
+                            "roll": {
+                                "type": "uint32",
+                                "id": 2
                             }
                         }
                     },
@@ -130,27 +160,64 @@
                     },
                     "bet_object": {
                         "fields": {
-                            "account": {
+                            "tx_id": {
                                 "type": "bytes",
                                 "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "TRANSACTION_ID"
+                                }
+                            },
+                            "account": {
+                                "type": "bytes",
+                                "id": 2,
                                 "options": {
                                     "(koinos.btype)": "ADDRESS"
                                 }
                             },
                             "status": {
                                 "type": "bet_status",
-                                "id": 2
+                                "id": 3
                             },
                             "amount": {
                                 "type": "uint64",
-                                "id": 3,
+                                "id": 4,
                                 "options": {
                                     "jstype": "JS_STRING"
                                 }
                             },
                             "value": {
                                 "type": "uint32",
-                                "id": 4
+                                "id": 5
+                            },
+                            "roll": {
+                                "type": "uint32",
+                                "id": 6
+                            },
+                            "vrf_proof": {
+                                "type": "bytes",
+                                "id": 7,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            },
+                            "vrf_hash": {
+                                "type": "bytes",
+                                "id": 8,
+                                "options": {
+                                    "(koinos.btype)": "HEX"
+                                }
+                            }
+                        }
+                    },
+                    "history_object": {
+                        "fields": {
+                            "tx_ids": {
+                                "rule": "repeated",
+                                "type": "bytes",
+                                "id": 1,
+                                "options": {
+                                    "(koinos.btype)": "TRANSACTION_ID"
+                                }
                             }
                         }
                     }

@@ -15,7 +15,7 @@ export class Dice {
   }
 
   roll(args: dice.roll_arguments): dice.roll_result {
-    // const txId = args.txId;
+    // const tx_id = args.tx_id;
     // const vrf_proof = args.vrf_proof;
     // const vrf_hash = args.vrf_hash;
 
@@ -27,12 +27,23 @@ export class Dice {
   }
 
   get_bet(args: dice.get_bet_arguments): dice.get_bet_result {
-    // const txId = args.txId;
+    // const tx_id = args.tx_id;
 
     // YOUR CODE HERE
 
     const res = new dice.get_bet_result();
     // res.bet = ;
+
+    return res;
+  }
+
+  get_history(args: dice.get_history_arguments): dice.get_history_result {
+    // const account = args.account;
+
+    // YOUR CODE HERE
+
+    const res = new dice.get_history_result();
+    // res.history = ;
 
     return res;
   }

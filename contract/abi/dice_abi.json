@@ -1,0 +1,33 @@
+{
+    "methods": {
+        "bet": {
+            "argument": "dice.bet_arguments",
+            "return": "dice.bet_result",
+            "description": "Place a bet",
+            "entry_point": 182740940,
+            "read_only": false
+        },
+        "roll": {
+            "argument": "dice.roll_arguments",
+            "return": "dice.roll_result",
+            "description": "Roll the dice",
+            "entry_point": 2902335468,
+            "read_only": false
+        },
+        "get_bet": {
+            "argument": "dice.get_bet_arguments",
+            "return": "dice.get_bet_result",
+            "description": "Get a bet",
+            "entry_point": 637551505,
+            "read_only": true
+        },
+        "get_history": {
+            "argument": "dice.get_history_arguments",
+            "return": "dice.get_history_result",
+            "description": "Get history",
+            "entry_point": 22325065,
+            "read_only": true
+        }
+    },
+    "types": "CowIChlhc3NlbWJseS9wcm90by9kaWNlLnByb3RvEgRkaWNlGhRrb2lub3Mvb3B0aW9ucy5wcm90byJhCg1iZXRfYXJndW1lbnRzEh4KB2FjY291bnQYASABKAxCBIC1GAZSB2FjY291bnQSGgoGYW1vdW50GAIgASgEQgIwAVIGYW1vdW50EhQKBXZhbHVlGAMgASgNUgV2YWx1ZSIMCgpiZXRfcmVzdWx0Im8KDnJvbGxfYXJndW1lbnRzEhkKBXR4X2lkGAEgASgMQgSAtRgEUgR0eElkEiEKCXZyZl9wcm9vZhgCIAEoDEIEgLUYAlIIdnJmUHJvb2YSHwoIdnJmX2hhc2gYAyABKAxCBIC1GAJSB3ZyZkhhc2giDQoLcm9sbF9yZXN1bHQiLgoRZ2V0X2JldF9hcmd1bWVudHMSGQoFdHhfaWQYASABKAxCBIC1GARSBHR4SWQiNAoOZ2V0X2JldF9yZXN1bHQSIgoDYmV0GAEgASgLMhAuZGljZS5iZXRfb2JqZWN0UgNiZXQiNwoVZ2V0X2hpc3RvcnlfYXJndW1lbnRzEh4KB2FjY291bnQYASABKAxCBIC1GAZSB2FjY291bnQiRAoSZ2V0X2hpc3RvcnlfcmVzdWx0Ei4KB2hpc3RvcnkYASABKAsyFC5kaWNlLmhpc3Rvcnlfb2JqZWN0UgdoaXN0b3J5IkQKEGJldF9wbGFjZWRfZXZlbnQSGgoGYW1vdW50GAEgASgEQgIwAVIGYW1vdW50EhQKBXZhbHVlGAIgASgNUgV2YWx1ZSJRChFkaWNlX3JvbGxlZF9ldmVudBIoCgZzdGF0dXMYASABKA4yEC5kaWNlLmJldF9zdGF0dXNSBnN0YXR1cxISCgRyb2xsGAIgASgNUgRyb2xsIvsBCgpiZXRfb2JqZWN0EhkKBXR4X2lkGAEgASgMQgSAtRgEUgR0eElkEh4KB2FjY291bnQYAiABKAxCBIC1GAZSB2FjY291bnQSKAoGc3RhdHVzGAMgASgOMhAuZGljZS5iZXRfc3RhdHVzUgZzdGF0dXMSGgoGYW1vdW50GAQgASgEQgIwAVIGYW1vdW50EhQKBXZhbHVlGAUgASgNUgV2YWx1ZRISCgRyb2xsGAYgASgNUgRyb2xsEiEKCXZyZl9wcm9vZhgHIAEoDEIEgLUYAlIIdnJmUHJvb2YSHwoIdnJmX2hhc2gYCCABKAxCBIC1GAJSB3ZyZkhhc2giLQoOaGlzdG9yeV9vYmplY3QSGwoGdHhfaWRzGAEgAygMQgSAtRgEUgV0eElkcyovCgpiZXRfc3RhdHVzEg4KCm5vdF9yb2xsZWQQABIHCgN3b24QARIICgRsb3N0EAJiBnByb3RvMw=="
+}

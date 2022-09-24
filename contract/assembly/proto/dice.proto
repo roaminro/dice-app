@@ -18,9 +18,9 @@ message bet_result {
 // @description Roll the dice
 // @read-only false
 message roll_arguments {
-  bytes txId = 1 [(koinos.btype) = TRANSACTION_ID];
-  bytes vrf_proof = 2 [(koinos.btype) = BASE64];
-  bytes vrf_hash = 3 [(koinos.btype) = BASE64];
+  bytes tx_id = 1 [(koinos.btype) = TRANSACTION_ID];
+  bytes vrf_proof = 2 [(koinos.btype) = HEX];
+  bytes vrf_hash = 3 [(koinos.btype) = HEX];
 }
 
 message roll_result {
@@ -29,11 +29,21 @@ message roll_result {
 // @description Get a bet
 // @read-only true
 message get_bet_arguments {
-  bytes txId = 1 [(koinos.btype) = TRANSACTION_ID];
+  bytes tx_id = 1 [(koinos.btype) = TRANSACTION_ID];
 }
 
 message get_bet_result {
   bet_object bet = 1;
+}
+
+// @description Get history
+// @read-only true
+message get_history_arguments {
+  bytes account = 1 [(koinos.btype) = ADDRESS];
+}
+
+message get_history_result {
+  history_object history = 1;
 }
 
 // events
@@ -44,6 +54,7 @@ message bet_placed_event {
 
 message dice_rolled_event {
   bet_status status = 1;
+  uint32 roll = 2;
 }
 
 // objects
@@ -54,8 +65,16 @@ enum bet_status {
 }
 
 message bet_object {
-  bytes account = 1 [(koinos.btype) = ADDRESS];
-  bet_status status = 2;
-  uint64 amount = 3 [jstype = JS_STRING];
-  uint32 value = 4;
+  bytes tx_id = 1 [(koinos.btype) = TRANSACTION_ID];
+  bytes account = 2 [(koinos.btype) = ADDRESS];
+  bet_status status = 3;
+  uint64 amount = 4 [jstype = JS_STRING];
+  uint32 value = 5;
+  uint32 roll = 6;
+  bytes vrf_proof = 7 [(koinos.btype) = HEX];
+  bytes vrf_hash = 8 [(koinos.btype) = HEX];
+}
+
+message history_object {
+  repeated bytes tx_ids = 1 [(koinos.btype) = TRANSACTION_ID];
 }
