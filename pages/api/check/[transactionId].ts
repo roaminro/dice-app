@@ -7,7 +7,7 @@ import { TransactionJson } from 'koilib/lib/interface'
 import diceAbi from '../../../contract/abi/dice_abi_js.json'
 
 //env variables
-const { KOINOS_WIF, KOINOS_RPC_URL } = process.env
+const { KOINOS_WIF, KOINOS_RPC_URL, DICE_CONTRACT_ADDR } = process.env
 
 // @ts-ignore koilib_types is needed when using koilib
 diceAbi.koilib_types = diceAbi.types
@@ -17,7 +17,7 @@ const signer = Signer.fromWif(KOINOS_WIF as string)
 signer.provider = provider
 
 const diceContract = new Contract({
-  id: '1LZgKPHVLqrVv418UbFCymU5NNwSG2sUpm',
+  id: DICE_CONTRACT_ADDR,
   // @ts-ignore the abi provided is compatible
   abi: diceAbi,
   provider,
@@ -34,7 +34,6 @@ type Result = {
   vrfProof: string
   vrfHash: string,
   roll: string,
-  rollTxId: string;
 }
 
 type ResponseError = {
@@ -59,7 +58,7 @@ export default async function handler(
 
     // @ts-ignore bet.status is a valid object
     if (result?.bet?.status != undefined && result?.bet?.status != 0) {
-      // throw new ApiError(400, `dice has already been rolled for transaction with id "${transactionId}"`)
+      throw new ApiError(400, `dice has already been rolled for transaction with id "${transactionId}"`)
     }
 
     let transactions: {
@@ -104,7 +103,7 @@ export default async function handler(
     let vrfHash = proofToHash(vrfProof)
 
     // calculate roll locally
-    // vrfHash is a uint256, ans the contract uses a uint128, so we need to cast it
+    // vrfHash is a uint256, and the contract uses a uint128, so we need to cast it
     const random = BigInt('0x' + vrfHash.substring(0, 32))
     const roll = random % 6n + 1n
 
@@ -122,7 +121,7 @@ export default async function handler(
       sendTransaction: false
     })
 
-    res.status(200).json({ vrfProof, vrfHash, roll: roll.toString(), rollTxId: txInfo.transaction?.id! })
+    res.status(200).json({ vrfProof, vrfHash, roll: roll.toString() })
   } catch (error) {
     if (error instanceof ApiError) {
       const { statusCode, message } = error
