@@ -206,6 +206,20 @@
                                 "options": {
                                     "(koinos.btype)": "HEX"
                                 }
+                            },
+                            "roll_tx_id": {
+                                "type": "bytes",
+                                "id": 9,
+                                "options": {
+                                    "(koinos.btype)": "TRANSACTION_ID"
+                                }
+                            },
+                            "timestamp": {
+                                "type": "uint64",
+                                "id": 10,
+                                "options": {
+                                    "jstype": "JS_STRING"
+                                }
                             }
                         }
                     },

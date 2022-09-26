@@ -460,6 +460,17 @@ export namespace dice {
         writer.uint32(66);
         writer.bytes(unique_name_vrf_hash);
       }
+
+      const unique_name_roll_tx_id = message.roll_tx_id;
+      if (unique_name_roll_tx_id !== null) {
+        writer.uint32(74);
+        writer.bytes(unique_name_roll_tx_id);
+      }
+
+      if (message.timestamp != 0) {
+        writer.uint32(80);
+        writer.uint64(message.timestamp);
+      }
     }
 
     static decode(reader: Reader, length: i32): bet_object {
@@ -501,6 +512,14 @@ export namespace dice {
             message.vrf_hash = reader.bytes();
             break;
 
+          case 9:
+            message.roll_tx_id = reader.bytes();
+            break;
+
+          case 10:
+            message.timestamp = reader.uint64();
+            break;
+
           default:
             reader.skipType(tag & 7);
             break;
@@ -518,6 +537,8 @@ export namespace dice {
     roll: u32;
     vrf_proof: Uint8Array | null;
     vrf_hash: Uint8Array | null;
+    roll_tx_id: Uint8Array | null;
+    timestamp: u64;
 
     constructor(
       tx_id: Uint8Array | null = null,
@@ -527,7 +548,9 @@ export namespace dice {
       value: u32 = 0,
       roll: u32 = 0,
       vrf_proof: Uint8Array | null = null,
-      vrf_hash: Uint8Array | null = null
+      vrf_hash: Uint8Array | null = null,
+      roll_tx_id: Uint8Array | null = null,
+      timestamp: u64 = 0
     ) {
       this.tx_id = tx_id;
       this.account = account;
@@ -537,6 +560,8 @@ export namespace dice {
       this.roll = roll;
       this.vrf_proof = vrf_proof;
       this.vrf_hash = vrf_hash;
+      this.roll_tx_id = roll_tx_id;
+      this.timestamp = timestamp;
     }
   }
 

@@ -6,10 +6,9 @@ const CONTRACT_PUB_KEY = Base64.decode('AsUVdQkJaKITavUj5-IyoC0xMYejCu1lpzSr30YV
 
 const BETS_SPACE_ID = 0;
 const HISTORY_SPACE_ID = 1;
-const GLOBAL_HISTORY_KEY = new Uint8Array(0);
 
-const USER_HISTORY_SIZE = 20;
-const GLOBAL_HISTORY_SIZE = 50;
+const USER_HISTORY_SIZE = 10;
+const GLOBAL_HISTORY_SIZE = 20;
 
 export class Dice {
   contractId: Uint8Array;
@@ -17,6 +16,8 @@ export class Dice {
   historySpace: Space.Space<Uint8Array, dice.history_object>;
 
   constructor() {
+    System.setSystemBufferSize(1024*100);
+
     this.contractId = System.getContractId();
 
     this.betsSpace = new Space.Space<Uint8Array, dice.bet_object>(
@@ -42,11 +43,14 @@ export class Dice {
       history = new dice.history_object();
     }
 
-    const historySize = history.tx_ids.unshift(txId);
+    let historySize = history.tx_ids.unshift(txId);
 
-    if (historySize > max) {
+    while (historySize > max) {
       history.tx_ids.pop();
+      historySize -= 1;
     }
+
+    this.historySpace.put(account, history);
   }
 
   bet(args: dice.bet_arguments): dice.bet_result {
@@ -58,7 +62,7 @@ export class Dice {
     const value = args.value;
 
     System.require(amount > 0, 'amount must be greater than 0');
-    System.require(value > 0 && value < 6, 'value must be between 1 and 6');
+    System.require(value >= 1 && value <= 6, 'value must be between 1 and 6');
 
     // tansfer the Koin tokens to the contract
     const token = new Token(KOIN_TOKEN_ADDR);
@@ -68,8 +72,13 @@ export class Dice {
     const txField = System.getTransactionField('id')!;
     const tx_id = txField.bytes_value!;
 
+    // get block time
+    const blockField = System.getBlockField('header.timestamp')!;
+    const timestamp = blockField.uint64_value;
+
     // save bet
     const bet = new dice.bet_object(tx_id, account, dice.bet_status.not_rolled, amount, value);
+    bet.timestamp = timestamp;
 
     this.betsSpace.put(tx_id, bet);
 
@@ -77,7 +86,7 @@ export class Dice {
     this.addBetToHistory(account, tx_id, USER_HISTORY_SIZE);
 
     // add bet to global history
-    this.addBetToHistory(GLOBAL_HISTORY_KEY, tx_id, GLOBAL_HISTORY_SIZE);
+    this.addBetToHistory(this.contractId, tx_id, GLOBAL_HISTORY_SIZE);
 
     // Emit an event
     const event = new dice.bet_placed_event(amount, value);
@@ -108,7 +117,7 @@ export class Dice {
     // check vrf proof
     System.require(System.verifyVRFProof(CONTRACT_PUB_KEY, vrf_proof, vrf_hash, tx_id), 'vrf proof is invalid');
 
-    // roll the dice'0x' + 
+    // roll the dice
     let mh = new Crypto.Multihash();
     mh.deserialize(vrf_hash);
     const random = u128.fromBytes(mh.digest, true);
@@ -132,6 +141,11 @@ export class Dice {
       bet!.status = dice.bet_status.lost;
     }
 
+    // get transaction id
+    const txField = System.getTransactionField('id')!;
+    const roll_tx_id = txField.bytes_value!;
+  
+    bet!.roll_tx_id = roll_tx_id;
     bet!.vrf_proof = vrf_proof;
     bet!.vrf_hash = vrf_hash;
 

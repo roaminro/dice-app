@@ -7,7 +7,7 @@ import { TransactionJson } from 'koilib/lib/interface'
 import diceAbi from '../../../contract/abi/dice_abi_js.json'
 
 //env variables
-const { KOINOS_WIF, KOINOS_RPC_URL, DICE_CONTRACT_ADDR } = process.env
+const { KOINOS_WIF, KOINOS_RPC_URL, NEXT_PUBLIC_DICE_CONTRACT_ADDR } = process.env
 
 // @ts-ignore koilib_types is needed when using koilib
 diceAbi.koilib_types = diceAbi.types
@@ -17,7 +17,7 @@ const signer = Signer.fromWif(KOINOS_WIF as string)
 signer.provider = provider
 
 const diceContract = new Contract({
-  id: DICE_CONTRACT_ADDR,
+  id: NEXT_PUBLIC_DICE_CONTRACT_ADDR,
   // @ts-ignore the abi provided is compatible
   abi: diceAbi,
   provider,
@@ -118,8 +118,11 @@ export default async function handler(
       vrf_proof: vrfProof,
       vrf_hash: vrfHash,
     }, {
-      sendTransaction: false
+      rcLimit: '100000000'
+      // sendTransaction: false
     })
+
+    console.log(txInfo.receipt)
 
     res.status(200).json({ vrfProof, vrfHash, roll: roll.toString() })
   } catch (error) {

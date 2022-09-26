@@ -73,6 +73,8 @@ message bet_object {
   uint32 roll = 6;
   bytes vrf_proof = 7 [(koinos.btype) = HEX];
   bytes vrf_hash = 8 [(koinos.btype) = HEX];
+  bytes roll_tx_id = 9 [(koinos.btype) = TRANSACTION_ID];
+  uint64 timestamp = 10 [jstype = JS_STRING];
 }
 
 message history_object {
