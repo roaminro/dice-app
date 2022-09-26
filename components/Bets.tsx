@@ -14,14 +14,14 @@ import {
 import { Spinner } from '@chakra-ui/react'
 import useSWR from 'swr'
 import { AppContext } from '../context/AppContext'
-import { Bet } from '../types/Bet'
+import { Bet, BetStatus } from '../types/Bet'
 import { Contract, utils } from 'koilib'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 
 //env variables
 const { NEXT_PUBLIC_EXPLORER_TX_URL } = process.env
 
-const truncate = (input: string) => `${input.substring(0, 11)}...${input.substring(input.length - 5, input.length)}`
+const truncate = (input: string) => input && input !== '0x' ? `${input.substring(0, 11)}...${input.substring(input.length - 5, input.length)}` : ''
 
 export async function getBets(
   key: string,
@@ -41,10 +41,14 @@ export async function getBets(
       })
 
       if (getBetResult) {
-        if (!getBetResult.bet.status || getBetResult.bet.status == 0) {
+        if (!getBetResult.bet.status || getBetResult.bet.status == BetStatus.NOT_ROLLED) {
           const checkResult = await fetch(`api/check/${tx_id}`)
-          console.log(await checkResult.json())
-
+          const data = await checkResult.json()
+          if (!data.statusCode) {
+            getBetResult.bet.roll = parseInt(data.roll)
+            getBetResult.bet.roll_tx_id = data.rollTransactionId
+            getBetResult.bet.status = getBetResult.bet.value === getBetResult.bet.roll ? BetStatus.WON : BetStatus.LOST
+          }
         }
 
         getBetResult.bet.amount = utils.formatUnits(getBetResult.bet.amount, 8)
@@ -62,19 +66,16 @@ export default function Bets() {
 
   const { account, contract } = state
 
-  const { data, error } = useSWR(['userBets', account, contract], getBets, { refreshInterval: 1000 })
-
-  console.log(data, error)
-
+  const { data } = useSWR(['userBets', account, contract], getBets, { refreshInterval: 1000 })
 
   return (
     <Box borderWidth='thin' borderColor='gray.300' borderRadius='lg' padding='4' margin='4'>
       <Heading as='h3' size='md'>
-        Your bets
+        Your last 10 bets
       </Heading>
 
       {!data ?
-        'loading'
+        <Spinner />
         :
         <TableContainer>
           <Table variant='simple'>
@@ -94,10 +95,10 @@ export default function Bets() {
                 data?.map((bet) => {
                   let status: string
                   switch (bet.status) {
-                    case 1:
+                    case BetStatus.WON:
                       status = 'won'
                       break
-                    case 2:
+                    case BetStatus.LOST:
                       status = 'lost'
                       break
                     default:
@@ -124,7 +125,13 @@ export default function Bets() {
                       <Td>{bet.roll}</Td>
                       <Td>
                         <Link href={`${NEXT_PUBLIC_EXPLORER_TX_URL}${bet.roll_tx_id}`} isExternal>
-                          {truncate(bet.roll_tx_id)} <ExternalLinkIcon mx='2px' />
+                          {
+                            bet.roll_tx_id ?
+                              <>
+                                {truncate(bet.roll_tx_id)} <ExternalLinkIcon mx='2px' />
+                              </>
+                              : ''
+                          }
                         </Link>
                       </Td>
                     </Tr>

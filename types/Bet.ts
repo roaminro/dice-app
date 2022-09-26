@@ -10,3 +10,9 @@ export type Bet = {
   vrf_hash: string
   roll_tx_id: string
 }
+
+export enum BetStatus {
+  NOT_ROLLED = 0,
+  WON,
+  LOST
+}

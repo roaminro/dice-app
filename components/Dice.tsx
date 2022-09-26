@@ -47,11 +47,19 @@ export default function Dice() {
         account,
         amount: utils.parseUnits(state.amount, 8),
         value: state.value
-      }, { sendTransaction: false, signTransaction: false, rcLimit: '100000000' })
+      }, { sendTransaction: false, signTransaction: false, rcLimit: '20000000' })
 
       // send transaction
       const result = await contract?.signer?.sendTransaction(transaction as TransactionJson)
       console.log(result?.receipt)
+
+      toast({
+        title: 'Placing bet',
+        description: 'The transaction containing your bet is being processed, this may take some time',
+        status: 'info',
+        duration: 5000,
+        isClosable: true,
+      })
 
       await result?.transaction.wait()
 
@@ -68,7 +76,7 @@ export default function Dice() {
 
       toast({
         title: 'Bet placed',
-        description: 'The bet was successfully placed',
+        description: 'Your bet was successfully placed!',
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -76,6 +84,13 @@ export default function Dice() {
 
     } catch (error) {
       console.error(error)
+      toast({
+        title: 'Bet failed',
+        description: `Your bet could not be placed: ${error}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
     } finally {
       setState({ ...state, loading: false })
     }

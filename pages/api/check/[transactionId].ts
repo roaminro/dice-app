@@ -34,6 +34,7 @@ type Result = {
   vrfProof: string
   vrfHash: string,
   roll: string,
+  rollTransactionId: string
 }
 
 type ResponseError = {
@@ -79,6 +80,7 @@ export default async function handler(
       throw new ApiError(404, `transaction with id "${transactionId}" does not exist`)
     }
 
+    // uncomment the following code to only allow to roll the dice when reaching irreversibility
     // get the last block that contains the transaction (should be least old block)
     // const { containing_blocks: containingBlocks } = transactions[0]
 
@@ -124,7 +126,7 @@ export default async function handler(
 
     console.log(txInfo.receipt)
 
-    res.status(200).json({ vrfProof, vrfHash, roll: roll.toString() })
+    res.status(200).json({ vrfProof, vrfHash, roll: roll.toString(), rollTransactionId: txInfo.transaction?.id! })
   } catch (error) {
     if (error instanceof ApiError) {
       const { statusCode, message } = error

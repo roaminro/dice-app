@@ -2,7 +2,6 @@ import type { NextPage } from 'next'
 import {
   Box,
   Button,
-  Center,
   Flex,
 } from '@chakra-ui/react'
 import { AppContext } from '../context/AppContext'
@@ -10,9 +9,8 @@ import Nav from '../components/Nav'
 import { useContext } from 'react'
 
 import Bets from '../components/Bets'
-import { Bet } from '../types/Bet'
 import Dice from '../components/Dice'
-import { connect, connecting } from '../context/AppActions'
+import { connect } from '../context/AppActions'
 
 const Home: NextPage = () => {
   const { state, dispatch } = useContext(AppContext)
