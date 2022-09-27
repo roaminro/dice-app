@@ -15,6 +15,7 @@ import {
   SliderThumb,
   SliderTrack,
   useToast,
+  Heading,
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 
@@ -105,6 +106,8 @@ export default function Dice() {
 
   return (
     <Box borderWidth='thin' borderColor='gray.300' borderRadius='lg' padding='4' margin='4'>
+      <Heading as='h3' size='md'>If you guess the correct dice roll you&lsquo;ll double the amount you bet</Heading>
+      <br />
       <form onSubmit={onSubmitForm}>
         <FormControl key='value'>
           <FormLabel htmlFor='value'>Pick a number between 1 and 6</FormLabel>
