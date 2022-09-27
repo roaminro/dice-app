@@ -31,19 +31,29 @@ export async function getBets(
   const bets: Bet[] = []
 
   if (diceContract) {
+    // get history
     const { result: getHistoryResult } = await diceContract!.functions.get_history<{ bets: Bet[] }>({
       account
     })
 
     for (const bet of getHistoryResult!.bets) {
+      // if not rolled yet, call api to roll dice
       if (!bet.status || bet.status == BetStatus.NOT_ROLLED) {
         const checkResult = await fetch(`api/check/${bet.tx_id}`)
         const data = await checkResult.json()
         if (!data.statusCode) {
+          // update bet
           bet.roll = parseInt(data.roll)
           bet.roll_tx_id = data.rollTransactionId
           bet.status = bet.value === bet.roll ? BetStatus.WON : BetStatus.LOST
         }
+      }
+
+      // update amount, show negative if lost, 2x amount if won
+      if (bet.status == BetStatus.WON) {
+        bet.gainLossAmount = utils.formatUnits(`${parseInt(bet.amount) * 2}`, 8)
+      } else if (bet.status == BetStatus.LOST) {
+        bet.gainLossAmount = utils.formatUnits(`-${bet.amount}`, 8)
       }
 
       bet.amount = utils.formatUnits(bet.amount, 8)
@@ -78,8 +88,9 @@ export default function Bets() {
                 <Th>Timestamp</Th>
                 <Th>Transaction ID</Th>
                 <Th>Status</Th>
-                <Th>Amount</Th>
-                <Th>Value</Th>
+                <Th>Bet Amount</Th>
+                <Th>Gain/Loss</Th>
+                <Th># picked</Th>
                 <Th>Roll</Th>
                 <Th>Roll Transaction ID</Th>
               </Tr>
@@ -115,6 +126,7 @@ export default function Bets() {
                       </Td>
                       <Td>{status || <Spinner />}</Td>
                       <Td>{bet.amount}</Td>
+                      <Td>{bet.gainLossAmount}</Td>
                       <Td>{bet.value}</Td>
                       <Td>{bet.roll}</Td>
                       <Td>

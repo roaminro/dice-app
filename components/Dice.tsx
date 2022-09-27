@@ -34,7 +34,7 @@ export default function Dice() {
   const [state, setState] = useState({
     loading: false,
     value: 1,
-    amount: '1'
+    amount: '0.00000000'
   })
 
   const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {

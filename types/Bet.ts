@@ -4,6 +4,7 @@ export type Bet = {
   account: string
   status: number
   amount: string
+  gainLossAmount: string
   value: number
   roll: number
   vrf_proof: string
