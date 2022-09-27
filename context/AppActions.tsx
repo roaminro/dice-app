@@ -1,12 +1,9 @@
 import React from 'react'
 
 import * as kondor from '../node_modules/kondor-js/lib/browser'
-import { Contract } from 'koilib'
+import { Contract, utils } from 'koilib'
 
 import diceAbi from '../contract/abi/dice_abi_js.json'
-
-//env variables
-const { NEXT_PUBLIC_DICE_CONTRACT_ADDR } = process.env
 
 // @ts-ignore koilib_types is needed when using koilib
 diceAbi.koilib_types = diceAbi.types
@@ -30,7 +27,8 @@ type Connected = {
   type: ActionType.Connected
   payload: {
     account: string
-    contract: Contract
+    diceContract: Contract
+    koinContract: Contract
   }
 };
 
@@ -40,18 +38,18 @@ export const connecting = (): Connecting => ({
   type: ActionType.Connecting
 })
 
-export const connected = (account: string, contract: Contract): Connected => ({
+export const connected = (account: string, diceContract: Contract, koinContract: Contract): Connected => ({
   type: ActionType.Connected,
   payload: {
     account,
-    contract
+    diceContract,
+    koinContract
   }
 })
 
 export const error = (): Error => ({
   type: ActionType.Error,
 })
-
 
 export const connect = async (
   dispatch: React.Dispatch<AppActions>
@@ -61,8 +59,8 @@ export const connect = async (
   try {
     const [account] = await kondor.getAccounts()
 
-    const contract = new Contract({
-      id: NEXT_PUBLIC_DICE_CONTRACT_ADDR,
+    const diceContract = new Contract({
+      id: process.env.NEXT_PUBLIC_DICE_CONTRACT_ADDR,
       // @ts-ignore the abi provided is compatible
       abi: diceAbi,
       // @ts-ignore the provider provided is compatible
@@ -71,8 +69,17 @@ export const connect = async (
       signer: kondor.getSigner(account.address),
     })
 
+    const koinContract = new Contract({
+      id: process.env.NEXT_PUBLIC_KOIN_CONTRACT_ADDR,
+      abi: utils.tokenAbi,
+      // @ts-ignore the provider provided is compatible
+      provider: kondor.provider,
+      // @ts-ignore the signer provided is compatible
+      signer: kondor.getSigner(account.address),
+    })
+
     // @ts-ignore getAccounts returns objects, not strings
-    dispatch(connected(account.address, contract))
+    dispatch(connected(account.address, diceContract, koinContract))
   } catch (e) {
     console.error(e)
     dispatch(error())

@@ -22,13 +22,14 @@ import { AppContext } from '../context/AppContext'
 import { Bet } from '../types/Bet'
 import { TransactionJson } from 'koilib/lib/interface'
 import { utils } from 'koilib'
+import Balance from './Balance'
 
 export default function Dice() {
   const toast = useToast()
   const { state: appState } = useContext(AppContext)
   const { mutate } = useSWRConfig()
 
-  const { account, contract } = appState
+  const { account, diceContract, koinContract } = appState
 
   const [state, setState] = useState({
     loading: false,
@@ -43,14 +44,14 @@ export default function Dice() {
       setState({ ...state, loading: true })
 
       // generate transatcion
-      const { transaction } = await contract!.functions.bet({
+      const { transaction } = await diceContract!.functions.bet({
         account,
         amount: utils.parseUnits(state.amount, 8),
         value: state.value
       }, { sendTransaction: false, signTransaction: false, rcLimit: '20000000' })
 
       // send transaction
-      const result = await contract?.signer?.sendTransaction(transaction as TransactionJson)
+      const result = await diceContract?.signer?.sendTransaction(transaction as TransactionJson)
       console.log(result?.receipt)
 
       toast({
@@ -64,7 +65,7 @@ export default function Dice() {
       await result?.transaction.wait()
 
       // update userBets cache with the new transaction
-      mutate(['userBets', account, contract], (bets: Bet[]) => {
+      mutate(['userBets', account, diceContract], (bets: Bet[]) => {
         return [{
           tx_id: result?.transaction.id,
           account,
@@ -73,6 +74,8 @@ export default function Dice() {
           value: state.value
         }, ...bets]
       }, { revalidate: true })
+
+      mutate(['userBalance', account, koinContract])
 
       toast({
         title: 'Bet placed',
@@ -94,6 +97,10 @@ export default function Dice() {
     } finally {
       setState({ ...state, loading: false })
     }
+  }
+
+  const onBalanceClick = (amount: string) => {
+    setState({ ...state, amount })
   }
 
   return (
@@ -139,6 +146,7 @@ export default function Dice() {
             </NumberInputStepper>
           </NumberInput>
         </FormControl>
+        <Balance handleClick={onBalanceClick}/>
         <Button type='submit' isLoading={state.loading} marginTop='4' width='100%'>Place Bet</Button>
       </form>
     </Box>

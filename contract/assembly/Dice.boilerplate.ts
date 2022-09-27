@@ -43,7 +43,7 @@ export class Dice {
     // YOUR CODE HERE
 
     const res = new dice.get_history_result();
-    // res.history = ;
+    // res.bets = ;
 
     return res;
   }

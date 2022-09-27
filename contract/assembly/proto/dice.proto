@@ -43,7 +43,7 @@ message get_history_arguments {
 }
 
 message get_history_result {
-  history_object history = 1;
+  repeated bet_object bets = 1;
 }
 
 // events

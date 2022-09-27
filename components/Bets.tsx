@@ -10,8 +10,8 @@ import {
   Tr,
   Heading,
   Link,
+  Spinner,
 } from '@chakra-ui/react'
-import { Spinner } from '@chakra-ui/react'
 import useSWR from 'swr'
 import { AppContext } from '../context/AppContext'
 import { Bet, BetStatus } from '../types/Bet'
@@ -26,35 +26,29 @@ const truncate = (input: string) => input && input !== '0x' ? `${input.substring
 export async function getBets(
   key: string,
   account: string,
-  contract: Contract
+  diceContract: Contract
 ): Promise<Bet[]> {
   const bets: Bet[] = []
 
-  if (contract) {
-    const { result: getHistoryResult } = await contract!.functions.get_history<{ history: { tx_ids: string[] } }>({
+  if (diceContract) {
+    const { result: getHistoryResult } = await diceContract!.functions.get_history<{ bets: Bet[] }>({
       account
     })
 
-    for (const tx_id of getHistoryResult!.history.tx_ids) {
-      const { result: getBetResult } = await contract!.functions.get_bet<{ bet: Bet }>({
-        tx_id
-      })
-
-      if (getBetResult) {
-        if (!getBetResult.bet.status || getBetResult.bet.status == BetStatus.NOT_ROLLED) {
-          const checkResult = await fetch(`api/check/${tx_id}`)
-          const data = await checkResult.json()
-          if (!data.statusCode) {
-            getBetResult.bet.roll = parseInt(data.roll)
-            getBetResult.bet.roll_tx_id = data.rollTransactionId
-            getBetResult.bet.status = getBetResult.bet.value === getBetResult.bet.roll ? BetStatus.WON : BetStatus.LOST
-          }
+    for (const bet of getHistoryResult!.bets) {
+      if (!bet.status || bet.status == BetStatus.NOT_ROLLED) {
+        const checkResult = await fetch(`api/check/${bet.tx_id}`)
+        const data = await checkResult.json()
+        if (!data.statusCode) {
+          bet.roll = parseInt(data.roll)
+          bet.roll_tx_id = data.rollTransactionId
+          bet.status = bet.value === bet.roll ? BetStatus.WON : BetStatus.LOST
         }
-
-        getBetResult.bet.amount = utils.formatUnits(getBetResult.bet.amount, 8)
-
-        bets.push(getBetResult.bet)
       }
+
+      bet.amount = utils.formatUnits(bet.amount, 8)
+
+      bets.push(bet)
     }
   }
 
@@ -64,9 +58,9 @@ export async function getBets(
 export default function Bets() {
   const { state } = useContext(AppContext)
 
-  const { account, contract } = state
+  const { account, diceContract } = state
 
-  const { data } = useSWR(['userBets', account, contract], getBets, { refreshInterval: 1000 })
+  const { data } = useSWR(['userBets', account, diceContract], getBets, { refreshInterval: 10000 })
 
   return (
     <Box borderWidth='thin' borderColor='gray.300' borderRadius='lg' padding='4' margin='4'>

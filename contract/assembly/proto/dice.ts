@@ -285,11 +285,11 @@ export namespace dice {
 
   export class get_history_result {
     static encode(message: get_history_result, writer: Writer): void {
-      const unique_name_history = message.history;
-      if (unique_name_history !== null) {
+      const unique_name_bets = message.bets;
+      for (let i = 0; i < unique_name_bets.length; ++i) {
         writer.uint32(10);
         writer.fork();
-        history_object.encode(unique_name_history, writer);
+        bet_object.encode(unique_name_bets[i], writer);
         writer.ldelim();
       }
     }
@@ -302,7 +302,7 @@ export namespace dice {
         const tag = reader.uint32();
         switch (tag >>> 3) {
           case 1:
-            message.history = history_object.decode(reader, reader.uint32());
+            message.bets.push(bet_object.decode(reader, reader.uint32()));
             break;
 
           default:
@@ -314,10 +314,10 @@ export namespace dice {
       return message;
     }
 
-    history: history_object | null;
+    bets: Array<bet_object>;
 
-    constructor(history: history_object | null = null) {
-      this.history = history;
+    constructor(bets: Array<bet_object> = []) {
+      this.bets = bets;
     }
   }
 

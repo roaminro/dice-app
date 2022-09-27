@@ -118,8 +118,9 @@
                     },
                     "get_history_result": {
                         "fields": {
-                            "history": {
-                                "type": "history_object",
+                            "bets": {
+                                "rule": "repeated",
+                                "type": "bet_object",
                                 "id": 1
                             }
                         }

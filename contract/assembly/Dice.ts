@@ -186,7 +186,11 @@ export class Dice {
     const history = this.historySpace.get(account);
 
     if (history) {
-      res.history = history;
+      for (let index = 0; index < history.tx_ids.length; index++) {
+        const txId = history.tx_ids[index];
+        const bet = this.betsSpace.get(txId)!;
+        res.bets.push(bet);
+      }
     }
 
     return res;

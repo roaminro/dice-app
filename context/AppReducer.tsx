@@ -6,7 +6,8 @@ export interface AppState {
   connecting: boolean
   connected: boolean
   error: boolean
-  contract: Contract | undefined
+  diceContract: Contract | undefined
+  koinContract: Contract | undefined
 }
 
 export const initialAppState: AppState = {
@@ -14,7 +15,8 @@ export const initialAppState: AppState = {
   connecting: false,
   connected: false,
   error: false,
-  contract: undefined,
+  diceContract: undefined,
+  koinContract: undefined,
 }
 
 export const AppReducer = (
@@ -30,7 +32,8 @@ export const AppReducer = (
         connecting: false, 
         connected: true,
         account: action.payload.account,
-        contract: action.payload.contract
+        diceContract: action.payload.diceContract,
+        koinContract: action.payload.koinContract
       }
     case ActionType.Error:
       return { ...state, error: true, connecting: false }
