@@ -27,6 +27,7 @@ import Balance from './Balance'
 
 //env variables
 const { NEXT_PUBLIC_KOINOS_RPC_URL } = process.env
+const provider = new Provider(NEXT_PUBLIC_KOINOS_RPC_URL as string)
 
 export default function Dice() {
   const toast = useToast()
@@ -34,7 +35,6 @@ export default function Dice() {
   const { mutate } = useSWRConfig()
 
   const { account, diceContract, koinContract } = appState
-  const provider = new Provider(NEXT_PUBLIC_KOINOS_RPC_URL as string)
 
   const [state, setState] = useState({
     loading: false,
