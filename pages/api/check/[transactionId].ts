@@ -7,12 +7,12 @@ import { TransactionJson } from 'koilib/lib/interface'
 import diceAbi from '../../../contract/abi/dice_abi_js.json'
 
 //env variables
-const { KOINOS_WIF, KOINOS_RPC_URL, NEXT_PUBLIC_DICE_CONTRACT_ADDR } = process.env
+const { KOINOS_WIF, NEXT_PUBLIC_KOINOS_RPC_URL, NEXT_PUBLIC_DICE_CONTRACT_ADDR } = process.env
 
 // @ts-ignore koilib_types is needed when using koilib
 diceAbi.koilib_types = diceAbi.types
 
-const provider = new Provider([KOINOS_RPC_URL as string])
+const provider = new Provider([NEXT_PUBLIC_KOINOS_RPC_URL as string])
 const signer = Signer.fromWif(KOINOS_WIF as string)
 signer.provider = provider
 

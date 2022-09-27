@@ -22,8 +22,11 @@ import { useSWRConfig } from 'swr'
 import { AppContext } from '../context/AppContext'
 import { Bet } from '../types/Bet'
 import { TransactionJson } from 'koilib/lib/interface'
-import { utils } from 'koilib'
+import { utils, Provider } from 'koilib'
 import Balance from './Balance'
+
+//env variables
+const { NEXT_PUBLIC_KOINOS_RPC_URL } = process.env
 
 export default function Dice() {
   const toast = useToast()
@@ -31,6 +34,7 @@ export default function Dice() {
   const { mutate } = useSWRConfig()
 
   const { account, diceContract, koinContract } = appState
+  const provider = new Provider(NEXT_PUBLIC_KOINOS_RPC_URL as string)
 
   const [state, setState] = useState({
     loading: false,
@@ -63,7 +67,9 @@ export default function Dice() {
         isClosable: true,
       })
 
-      await result?.transaction.wait()
+      // await result?.transaction.wait()
+      // temporary fix: do not use Kondor's provider as it will error out
+      await provider.wait(result?.transaction.id!, 'byBlock', 60000)
 
       // update userBets cache with the new transaction
       mutate(['userBets', account, diceContract], (bets: Bet[]) => {
