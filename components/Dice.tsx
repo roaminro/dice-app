@@ -22,14 +22,8 @@ import { useSWRConfig } from 'swr'
 import { AppContext } from '../context/AppContext'
 import { connect } from '../context/AppActions'
 import { Bet } from '../types/Bet'
-import { TransactionJson } from 'koilib/lib/interface'
 import { utils, Provider } from 'koilib'
 import Balance from './Balance'
-
-import diceAbi from '../contract/abi/dice_abi_js.json'
-
-// @ts-ignore koilib_types is needed when using koilib
-diceAbi.koilib_types = diceAbi.types
 
 //env variables
 const { NEXT_PUBLIC_KOINOS_RPC_URL } = process.env
@@ -52,16 +46,21 @@ export default function Dice() {
 
       setState({ ...state, loading: true })
 
-      // generate, sign and send transatcion
-      const result= await diceContract!.functions.bet({
+      // generate and sign transatcion
+      let { transaction } = await diceContract!.functions.bet({
         account,
         amount: utils.parseUnits(state.amount, 8),
         value: state.value
       }, {
-        rcLimit: '20000000'
+        // the send transaction will not decode the args in Kondor
+        sendTransaction: false,
+        rcLimit: '20000000',
       })
+
+      // send transaction with local provider instance
+      const { receipt } = await provider.sendTransaction(transaction!)
       
-      console.log(result?.receipt)
+      console.log(receipt)
 
       toast({
         title: 'Placing bet',
@@ -71,14 +70,13 @@ export default function Dice() {
         isClosable: true,
       })
 
-      // await result?.transaction.wait()
       // temporary fix: do not use Kondor's provider as it will error out
-      await provider.wait(result?.transaction!.id!, 'byBlock', 60000)
+      await provider.wait(transaction!.id!, 'byBlock', 60000)
 
       // update bets cache with the new transaction
       mutate(['bets', account, diceContract], (bets: Bet[]) => {
         return [{
-          tx_id: result?.transaction!.id,
+          tx_id: transaction!.id,
           account,
           status: 0,
           amount: state.amount,
@@ -120,7 +118,7 @@ export default function Dice() {
 
   return (
     <Box borderWidth='thin' borderColor='gray.300' borderRadius='lg' padding='4' margin='4'>
-      <Heading as='h3' size='md'>Guess the correct dice roll to double your bet!</Heading>
+      <Heading as='h3' size='md'>Guess the correct dice roll and double your bet!</Heading>
       <br />
       <form onSubmit={onSubmitForm}>
         <FormControl key='value'>
