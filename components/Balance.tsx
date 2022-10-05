@@ -25,25 +25,26 @@ interface BalanceProps {
 }
 
 export default function Balance({ handleClick }: BalanceProps) {
-  const { state } = useContext(AppContext)
-
-  const { account, koinContract } = state
+  const { state: { account, koinContract } } = useContext(AppContext)
 
   const { data: balance } = useSWR(
     ['userBalance', account, koinContract],
-    getBalance, 
+    getBalance,
     { refreshInterval: 10000 }
   )
 
   return (
     <Box marginTop='4'>
       {
-      !balance ?
-        <Spinner />
-      :
-        <Link onClick={() => handleClick(balance)}>
-          Koin balance: {balance}
-        </Link>
+        !account ?
+          <></>
+          :
+          !balance ?
+            <Spinner />
+            :
+            <Link onClick={() => handleClick(balance)}>
+              Koin balance: {balance}
+            </Link>
       }
     </Box>
   )

@@ -1,12 +1,17 @@
-import { Contract } from 'koilib'
+import { Contract, Provider } from 'koilib'
 import { AppActions, ActionType } from './AppActions'
+
+import diceAbi from '../contract/abi/dice_abi_js.json'
+
+// @ts-ignore koilib_types is needed when using koilib
+diceAbi.koilib_types = diceAbi.types
 
 export interface AppState {
   account: string
   connecting: boolean
   connected: boolean
   error: boolean
-  diceContract: Contract | undefined
+  diceContract: Contract
   koinContract: Contract | undefined
 }
 
@@ -15,7 +20,13 @@ export const initialAppState: AppState = {
   connecting: false,
   connected: false,
   error: false,
-  diceContract: undefined,
+  diceContract: new Contract({
+    id: process.env.NEXT_PUBLIC_DICE_CONTRACT_ADDR,
+    // @ts-ignore the abi provided is compatible
+    abi: diceAbi,
+    // @ts-ignore the provider provided is compatible
+    provider: new Provider(process.env.NEXT_PUBLIC_KOINOS_RPC_URL),
+  }),
   koinContract: undefined,
 }
 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import * as kondor from '../node_modules/kondor-js/lib/browser'
+import * as kondor from 'kondor-js'
 import { Contract, utils } from 'koilib'
 
 import diceAbi from '../contract/abi/dice_abi_js.json'
@@ -73,9 +73,7 @@ export const connect = async (
       id: process.env.NEXT_PUBLIC_KOIN_CONTRACT_ADDR,
       abi: utils.tokenAbi,
       // @ts-ignore the provider provided is compatible
-      provider: kondor.provider,
-      // @ts-ignore the signer provided is compatible
-      signer: kondor.getSigner(account.address),
+      provider: kondor.provider
     })
 
     // @ts-ignore getAccounts returns objects, not strings

@@ -14,9 +14,7 @@ import { connect } from '../context/AppActions'
 
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode()
-  const { state, dispatch } = useContext(AppContext)
-
-  const { account, connecting, connected } = state
+  const { state: { account, connecting, connected }, dispatch } = useContext(AppContext)
 
   const connectClick = async () => {
     await connect(dispatch)

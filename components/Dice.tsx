@@ -20,10 +20,16 @@ import {
 import { useSWRConfig } from 'swr'
 
 import { AppContext } from '../context/AppContext'
+import { connect } from '../context/AppActions'
 import { Bet } from '../types/Bet'
 import { TransactionJson } from 'koilib/lib/interface'
 import { utils, Provider } from 'koilib'
 import Balance from './Balance'
+
+import diceAbi from '../contract/abi/dice_abi_js.json'
+
+// @ts-ignore koilib_types is needed when using koilib
+diceAbi.koilib_types = diceAbi.types
 
 //env variables
 const { NEXT_PUBLIC_KOINOS_RPC_URL } = process.env
@@ -31,10 +37,8 @@ const provider = new Provider(NEXT_PUBLIC_KOINOS_RPC_URL as string)
 
 export default function Dice() {
   const toast = useToast()
-  const { state: appState } = useContext(AppContext)
+  const { state: { account, diceContract, koinContract, connected, connecting }, dispatch } = useContext(AppContext)
   const { mutate } = useSWRConfig()
-
-  const { account, diceContract, koinContract } = appState
 
   const [state, setState] = useState({
     loading: false,
@@ -48,15 +52,15 @@ export default function Dice() {
 
       setState({ ...state, loading: true })
 
-      // generate transatcion
-      const { transaction } = await diceContract!.functions.bet({
+      // generate, sign and send transatcion
+      const result= await diceContract!.functions.bet({
         account,
         amount: utils.parseUnits(state.amount, 8),
         value: state.value
-      }, { sendTransaction: false, signTransaction: false, rcLimit: '20000000' })
-
-      // send transaction
-      const result = await diceContract?.signer?.sendTransaction(transaction as TransactionJson)
+      }, {
+        rcLimit: '20000000'
+      })
+      
       console.log(result?.receipt)
 
       toast({
@@ -69,12 +73,12 @@ export default function Dice() {
 
       // await result?.transaction.wait()
       // temporary fix: do not use Kondor's provider as it will error out
-      await provider.wait(result?.transaction.id!, 'byBlock', 60000)
+      await provider.wait(result?.transaction!.id!, 'byBlock', 60000)
 
-      // update userBets cache with the new transaction
-      mutate(['userBets', account, diceContract], (bets: Bet[]) => {
+      // update bets cache with the new transaction
+      mutate(['bets', account, diceContract], (bets: Bet[]) => {
         return [{
-          tx_id: result?.transaction.id,
+          tx_id: result?.transaction!.id,
           account,
           status: 0,
           amount: state.amount,
@@ -106,13 +110,17 @@ export default function Dice() {
     }
   }
 
+  const connectClick = async () => {
+    await connect(dispatch)
+  }
+
   const onBalanceClick = (amount: string) => {
     setState({ ...state, amount })
   }
 
   return (
     <Box borderWidth='thin' borderColor='gray.300' borderRadius='lg' padding='4' margin='4'>
-      <Heading as='h3' size='md'>If you guess the correct dice roll you&lsquo;ll double the amount you bet</Heading>
+      <Heading as='h3' size='md'>Guess the correct dice roll to double your bet!</Heading>
       <br />
       <form onSubmit={onSubmitForm}>
         <FormControl key='value'>
@@ -155,8 +163,14 @@ export default function Dice() {
             </NumberInputStepper>
           </NumberInput>
         </FormControl>
-        <Balance handleClick={onBalanceClick}/>
-        <Button type='submit' isLoading={state.loading} marginTop='4' width='100%'>Place Bet</Button>
+        <Balance handleClick={onBalanceClick} />
+        {
+          connected
+            ?
+            <Button type='submit' isLoading={state.loading} marginTop='4' width='100%'>Place Bet</Button>
+            :
+            <Button onClick={connectClick} isLoading={connecting} marginTop='4' width='100%'>Connect with Kondor</Button>
+        }
       </form>
     </Box>
   )
