@@ -47,14 +47,15 @@ export default function Dice() {
       setState({ ...state, loading: true })
 
       // generate and sign transatcion
-      let { transaction } = await diceContract!.functions.bet({
+      let { transaction, receipt: test } = await diceContract!.functions.bet({
         account,
         amount: utils.parseUnits(state.amount, 8),
         value: state.value
       }, {
         // the send transaction will not decode the args in Kondor
         sendTransaction: false,
-        rcLimit: '20000000',
+        rcLimit: '1000000000',
+        payer: '1Bf5W4LZ2FTmzPcA6d8QeLgAYmCKdZp2nN',
       })
 
       // send transaction with local provider instance

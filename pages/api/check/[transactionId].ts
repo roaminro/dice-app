@@ -120,7 +120,8 @@ export default async function handler(
       vrf_proof: vrfProof,
       vrf_hash: vrfHash,
     }, {
-      rcLimit: '100000000'
+      rcLimit: '1000000000',
+      payer: '1Bf5W4LZ2FTmzPcA6d8QeLgAYmCKdZp2nN',
       // sendTransaction: false
     })
 
